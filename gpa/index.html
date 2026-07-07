@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPA Calculator - Ahmad Khamayseh</title>
+  <style>
+    :root {
+      --bg: #eef3f8;
+      --card: #ffffff;
+      --ink: #182235;
+      --muted: #65748a;
+      --line: #d7e0ea;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --green: #15803d;
+      --red: #b91c1c;
+      --gold: #a16207;
+      --soft-blue: #eff6ff;
+      --soft-green: #f0fdf4;
+      --soft-gold: #fefce8;
+      --shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #e8f0ff, #f8fafc 45%, #e8fff5);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    .page {
+      width: min(1180px, 94vw);
+      margin: 30px auto;
+    }
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 20px;
+      align-items: center;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      letter-spacing: -0.03em;
+    }
+    .program {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--soft-blue);
+      color: #1e40af;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+    .intro {
+      color: var(--muted);
+      line-height: 1.55;
+      margin: 8px 0 0;
+    }
+    .formula-card {
+      background: #0f172a;
+      color: white;
+      border-radius: 18px;
+      padding: 20px;
+    }
+    .formula-card .label {
+      color: #bfdbfe;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .formula-card .formula {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 24px 0 14px;
+    }
+    .buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 18px;
+      background: var(--accent);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.22);
+    }
+    button:hover { background: var(--accent-dark); }
+    .ai-btn { background: #7c3aed; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.22); }
+    .ai-btn:hover { background: #6d28d9; }
+    .info-wrap { position: relative; display: inline-block; }
+    .info-icon {
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      background: #111827;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tooltip {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 48px;
+      width: min(620px, 92vw);
+      max-height: 72vh;
+      overflow: auto;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      z-index: 20;
+      line-height: 1.5;
+    }
+    .info-wrap:hover .tooltip, .info-wrap.open .tooltip { display: block; }
+    .tooltip h3 { margin: 0 0 10px; }
+    .tooltip h4 { margin: 18px 0 8px; color: #1e40af; }
+    .tooltip table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tooltip th, .tooltip td { border: 1px solid var(--line); padding: 7px; text-align: left; }
+    .tooltip th { background: var(--soft-blue); }
+    .note {
+      background: var(--soft-gold);
+      border: 1px solid #fde68a;
+      color: #713f12;
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .result-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+    }
+    .result-card .small { color: var(--muted); font-size: 13px; margin-bottom: 6px; }
+    .result-card .big { font-size: 28px; font-weight: 800; }
+    .result-card.gpa { background: var(--soft-green); border-color: #bbf7d0; }
+    .table-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .table-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+    .table-head h2 { margin: 0; font-size: 22px; }
+    .table-head p { margin: 4px 0 0; color: var(--muted); }
+    .table-scroll { overflow-x: auto; }
+    table.main { width: 100%; border-collapse: collapse; min-width: 820px; }
+    table.main th {
+      text-align: left;
+      padding: 12px 14px;
+      background: #111827;
+      color: white;
+      font-size: 14px;
+      text-transform: lowercase;
+    }
+    table.main td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+    table.main tr:nth-child(even) { background: #fbfdff; }
+    table.main tr.added-row { background: #f0fdf4; }
+    input[type=number] {
+      width: 86px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    select {
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      font-size: 14px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #eef2ff;
+      color: #3730a3;
+      margin-left: 8px;
+    }
+    .source-line {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 14px 4px 0;
+      line-height: 1.5;
+    }
+    @media (max-width: 850px) {
+      .hero { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 540px) {
+      .result-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 27px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div>
+        <h1>Student GPA Calculator</h1>
+        <div class="program">Program: Computer Engineering (International)</div>
+        <p class="intro">This web application calculates GPA based on Ahmad Khamayseh's transcript courses. It uses the official Ilia State University GPA formula and the courses shown in the table.</p>
+      </div>
+      <div class="formula-card">
+        <div class="label">Official GPA formula</div>
+        <div class="formula">GPA = Σ(GP × credits) / Σ(credits)</div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <div class="buttons">
+        <button id="calculateBtn">Calculate</button>
+        <button id="calculateAiBtn" class="ai-btn">Calculate with Introduction to AI</button>
+      </div>
+      <div class="info-wrap" id="infoWrap">
+        <span class="info-icon" id="infoIcon">i</span>
+        <div class="tooltip">
+          <h3>English translation of the Ilia State University GPA rule</h3>
+          <p><strong>GPA</strong> is calculated as the sum of each course's Grade Point (GP) multiplied by the course credits, divided by the total number of credits.</p>
+          <p><strong>Formula:</strong> GPA = Σ(each course GP × each course credits) / Σ(total course credits).</p>
+          <h4>What is GP?</h4>
+          <p>GP means Grade Point. It is the converted value of a course score on a 4-point scale.</p>
+          <h4>Score categories</h4>
+          <table>
+            <thead><tr><th>Score</th><th>Category</th><th>GP rule</th></tr></thead>
+            <tbody>
+              <tr><td>0–50</td><td>F / Fail</td><td>0.00 GP</td></tr>
+              <tr><td>51–60</td><td>E</td><td>1.00 GP</td></tr>
+              <tr><td>61–70</td><td>D</td><td>Increases by 1/12 for each point above 60</td></tr>
+              <tr><td>71–80</td><td>C</td><td>Increases by 1/12 for each point above 60</td></tr>
+              <tr><td>81–90</td><td>B</td><td>Increases by 1/12 for each point above 60</td></tr>
+              <tr><td>91–95</td><td>A</td><td>Increases by 1/12 for each point above 60</td></tr>
+              <tr><td>96–100</td><td>A+</td><td>4.00 GP</td></tr>
+            </tbody>
+          </table>
+          <h4>Rounding</h4>
+          <p>The final GPA is rounded to one decimal place.</p>
+          <p><strong>Source document:</strong> Ilia State University GPA calculation rule, PDF 82542.</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="note"><strong>Special AI button:</strong> The transcript currently shows Introduction to Artificial Intelligence with 63 accumulated points and 0 earned credits because the course is still in progress. The second button assumes the final exam adds 30 points, so the course score becomes <strong>63 + 30 = 93</strong>, and it is calculated as a passed 6-credit course.</p>
+
+    <section class="result-grid">
+      <div class="result-card gpa"><div class="small">Official rounded GPA</div><div class="big" id="gpaRounded">—</div></div>
+      <div class="result-card"><div class="small">Exact GPA</div><div class="big" id="gpaExact">—</div></div>
+      <div class="result-card"><div class="small">Included credits</div><div class="big" id="creditTotal">—</div></div>
+      <div class="result-card"><div class="small">Mode</div><div class="big" id="modeLabel">—</div></div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-head">
+        <div>
+          <h2>Courses from transcript + 5 additional program courses</h2>
+          <p>The table loads automatically when the page opens. Credits, grades, and passed status can be edited before calculating.</p>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="main" id="courseTable">
+          <thead>
+            <tr><th>course</th><th>credit</th><th>grade</th><th>passed</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="source-line">Note: The first rows are from the Argus transcript. The last five green rows are additional Computer Engineering program courses, assumed as grade A/100, credit 6, and passed as required by the exam task.</p>
+  </div>
+
+  <script>
+    const courses = [
+  {
+    "course": "Computer Organization (ENG)",
+    "credit": 6,
+    "grade": 68,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Linear Algebra (ENG)",
+    "credit": 6,
+    "grade": 59,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Modern Thought I (ENG)",
+    "credit": 0,
+    "grade": 0,
+    "passed": "No"
+  },
+  {
+    "course": "Mathematical Foundation of Computing (ENG)",
+    "credit": 6,
+    "grade": 58,
+    "passed": "Yes"
+  },
+  {
+    "course": "Practical Course of Georgian for Foreigners (A1.1a) (ENG)",
+    "credit": 6,
+    "grade": 79,
+    "passed": "Yes"
+  },
+  {
+    "course": "Academic Techniques (ENG)",
+    "credit": 6,
+    "grade": 51,
+    "passed": "Yes"
+  },
+  {
+    "course": "Calculus III (ENG)",
+    "credit": 6,
+    "grade": 59,
+    "passed": "Yes"
+  },
+  {
+    "course": "Drones (ENG)",
+    "credit": 6,
+    "grade": 91,
+    "passed": "Yes"
+  },
+  {
+    "course": "Practical Course of Georgian for Foreigners (A1.1b) (ENG)",
+    "credit": 6,
+    "grade": 58,
+    "passed": "Yes"
+  },
+  {
+    "course": "System Programming (ENG)",
+    "credit": 6,
+    "grade": 83,
+    "passed": "Yes"
+  },
+  {
+    "course": "Basics of Entrepreneurship (ENG)",
+    "credit": 6,
+    "grade": 58,
+    "passed": "Yes"
+  },
+  {
+    "course": "Embedded Systems (ENG)",
+    "credit": 6,
+    "grade": 66,
+    "passed": "Yes"
+  },
+  {
+    "course": "IT Project Management (ENG)",
+    "credit": 6,
+    "grade": 85,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Modern Thought I (ENG)",
+    "credit": 6,
+    "grade": 71,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Operating Systems (ENG)",
+    "credit": 6,
+    "grade": 75,
+    "passed": "Yes"
+  },
+  {
+    "course": "Algorithms and Data Structures (ENG)",
+    "credit": 6,
+    "grade": 70,
+    "passed": "Yes"
+  },
+  {
+    "course": "Computational and Statistical Methods (ENG)",
+    "credit": 6,
+    "grade": 55,
+    "passed": "Yes"
+  },
+  {
+    "course": "Computer and Data Networks (ENG)",
+    "credit": 6,
+    "grade": 90,
+    "passed": "Yes"
+  },
+  {
+    "course": "Principles of Numerical Methods (ENG)",
+    "credit": 6,
+    "grade": 88,
+    "passed": "Yes"
+  },
+  {
+    "course": "Web Programming (ENG)",
+    "credit": 6,
+    "grade": 56,
+    "passed": "Yes"
+  },
+  {
+    "course": "Circuit Analysis I (ENG)",
+    "credit": 6,
+    "grade": 67,
+    "passed": "Yes"
+  },
+  {
+    "course": "DevOps Technologies (ENG)",
+    "credit": 6,
+    "grade": 71,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction Computational Linguistics (ENG)",
+    "credit": 6,
+    "grade": 78,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Cyber Security (ENG)",
+    "credit": 0,
+    "grade": 42,
+    "passed": "No"
+  },
+  {
+    "course": "Programming Languages (ENG)",
+    "credit": 6,
+    "grade": 97,
+    "passed": "Yes"
+  },
+  {
+    "course": "Circuit Analysis II (ENG)",
+    "credit": 0,
+    "grade": 44,
+    "passed": "No"
+  },
+  {
+    "course": "Databases and Information Systems (ENG)",
+    "credit": 6,
+    "grade": 88,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Artificial Intelligence (ENG)",
+    "credit": 0,
+    "grade": 63,
+    "passed": "No"
+  },
+  {
+    "course": "Systems, Sustainability, and Climate change - Introduction (ENG)",
+    "credit": 6,
+    "grade": 81,
+    "passed": "Yes"
+  },
+  {
+    "course": "Basics of Physics 2 (ENG)",
+    "credit": 6,
+    "grade": 86,
+    "passed": "Yes"
+  },
+  {
+    "course": "Basics of Physics I (including Lab) (ENG)",
+    "credit": 8,
+    "grade": 71,
+    "passed": "Yes"
+  },
+  {
+    "course": "Calculus I (ENG)",
+    "credit": 6,
+    "grade": 91,
+    "passed": "Yes"
+  },
+  {
+    "course": "Calculus II (ENG)",
+    "credit": 6,
+    "grade": 89,
+    "passed": "Yes"
+  },
+  {
+    "course": "Electrophysiology (ENG)",
+    "credit": 5,
+    "grade": 72,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to General Chemistry (ENG)",
+    "credit": 8,
+    "grade": 93,
+    "passed": "Yes"
+  },
+  {
+    "course": "Introduction to Programming (ENG)",
+    "credit": 6,
+    "grade": 94,
+    "passed": "Yes"
+  },
+  {
+    "course": "Procedural Programming C (ENG)",
+    "credit": 6,
+    "grade": 97,
+    "passed": "Yes"
+  },
+  {
+    "course": "Digital Circuits (ENG)",
+    "credit": 6,
+    "grade": 100,
+    "passed": "Yes",
+    "added": true
+  },
+  {
+    "course": "Signals and Systems (ENG)",
+    "credit": 6,
+    "grade": 100,
+    "passed": "Yes",
+    "added": true
+  },
+  {
+    "course": "Architecture and Programming of Microprocessors (ENG)",
+    "credit": 6,
+    "grade": 100,
+    "passed": "Yes",
+    "added": true
+  },
+  {
+    "course": "Senior Design Project A (ENG)",
+    "credit": 6,
+    "grade": 100,
+    "passed": "Yes",
+    "added": true
+  },
+  {
+    "course": "Senior Design Project B (ENG)",
+    "credit": 6,
+    "grade": 100,
+    "passed": "Yes",
+    "added": true
+  }
+];
+    const aiCourseName = 'Introduction to Artificial Intelligence (ENG)';
+    const aiCourseCreditWhenPassed = 6;
+
+    function gpFromScore(score) {
+      const s = Number(score);
+      if (isNaN(s)) return 0;
+      if (s <= 50) return 0;
+      if (s <= 60) return 1.00;
+      if (s <= 95) return 1 + ((s - 60) / 12);
+      return 4.00;
+    }
+
+    function letterFromScore(score) {
+      const s = Number(score);
+      if (s >= 96) return 'A+';
+      if (s >= 91) return 'A';
+      if (s >= 81) return 'B';
+      if (s >= 71) return 'C';
+      if (s >= 61) return 'D';
+      if (s >= 51) return 'E';
+      return 'F';
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector('#courseTable tbody');
+      tbody.innerHTML = '';
+      courses.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        if (item.added) tr.classList.add('added-row');
+        tr.innerHTML = `
+          <td>${item.course}${item.added ? '<span class="tag">added course</span>' : ''}</td>
+          <td><input type="number" min="0" step="1" value="${item.credit}" data-field="credit" data-index="${index}"></td>
+          <td><input type="number" min="0" max="100" step="1" value="${item.grade}" data-field="grade" data-index="${index}"></td>
+          <td>
+            <select data-field="passed" data-index="${index}">
+              <option value="Yes" ${item.passed === 'Yes' ? 'selected' : ''}>Yes</option>
+              <option value="No" ${item.passed === 'No' ? 'selected' : ''}>No</option>
+            </select>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function readRows() {
+      const rows = [];
+      const tableRows = document.querySelectorAll('#courseTable tbody tr');
+      tableRows.forEach((tr, index) => {
+        const credit = Number(tr.querySelector('[data-field="credit"]').value);
+        const grade = Number(tr.querySelector('[data-field="grade"]').value);
+        const passed = tr.querySelector('[data-field="passed"]').value;
+        rows.push({
+          course: courses[index].course,
+          credit: isNaN(credit) ? 0 : credit,
+          grade: isNaN(grade) ? 0 : Math.max(0, Math.min(100, grade)),
+          passed: passed
+        });
+      });
+      return rows;
+    }
+
+    function calculate(rows) {
+      let totalCredits = 0;
+      let weightedTotal = 0;
+      rows.forEach(row => {
+        if (row.passed === 'Yes' && row.credit > 0) {
+          const gp = gpFromScore(row.grade);
+          totalCredits += row.credit;
+          weightedTotal += gp * row.credit;
+        }
+      });
+      const gpa = totalCredits > 0 ? weightedTotal / totalCredits : 0;
+      return { gpa, totalCredits, weightedTotal };
+    }
+
+    function showResult(result, mode) {
+      document.getElementById('gpaRounded').textContent = result.gpa.toFixed(1);
+      document.getElementById('gpaExact').textContent = result.gpa.toFixed(3);
+      document.getElementById('creditTotal').textContent = result.totalCredits.toString();
+      document.getElementById('modeLabel').textContent = mode;
+    }
+
+    function calculateNormal() {
+      const rows = readRows();
+      showResult(calculate(rows), 'Current');
+    }
+
+    function calculateWithAI() {
+      const rows = readRows().map(row => {
+        if (row.course === aiCourseName) {
+          const assumedScore = Math.min(100, row.grade + 30);
+          return { ...row, grade: assumedScore, credit: aiCourseCreditWhenPassed, passed: 'Yes' };
+        }
+        return row;
+      });
+      showResult(calculate(rows), 'With AI');
+    }
+
+    document.getElementById('calculateBtn').addEventListener('click', calculateNormal);
+    document.getElementById('calculateAiBtn').addEventListener('click', calculateWithAI);
+    document.getElementById('infoIcon').addEventListener('click', function () {
+      document.getElementById('infoWrap').classList.toggle('open');
+    });
+    document.addEventListener('click', function (event) {
+      const wrap = document.getElementById('infoWrap');
+      if (!wrap.contains(event.target)) wrap.classList.remove('open');
+    });
+
+    renderTable();
+    calculateNormal();
+  </script>
+</body>
+</html>
