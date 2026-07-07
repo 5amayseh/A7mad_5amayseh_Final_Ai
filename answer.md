@@ -69,6 +69,8 @@ I explored the Graph Navigator Bot and drew the complete graph.
 
 ---
 
+---
+
 ## Task 4: GPA Web Application
 
 The GPA web application is placed inside the `gpa` directory as required.
@@ -76,3 +78,15 @@ The GPA web application is placed inside the `gpa` directory as required.
 File:
 
 `gpa/index.html`
+
+The application includes the course table, program name, GPA information tooltip, Calculate button, and Calculate with Introduction to AI button.
+
+### GPA Calculation Screenshots
+
+Current GPA calculation result:
+
+![](gpa_current_calculated.png)
+
+GPA calculation with Introduction to AI final exam points included:
+
+![](gpa_with_ai_calculated.png)
